@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 20 Cryptocurrencies</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+        th { background-color: #f4f4f4; }
+        input, select { padding: 8px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>You can find TOP 20 Cryptocurrencies 😀</h1>
+    
+    <!-- Filter and Sort Controls -->
+    <div>
+        <input type="text" id="searchInput" placeholder="Search by name..." onkeyup="filterTable()">
+        <select id="sortBy" onchange="sortTable()">
+            <option value="name">Sort by Name</option>
+            <option value="price">Sort by Price (USD)</option>
+            <option value="market_cap">Sort by Market Cap</option>
+        </select>
+    </div>
+
+    <table id="cryptoTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price (USD)</th>
+                <th>Market Cap</th>
+                <th>24h Trading Volume</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        let cryptoData = [];
+
+        async function fetchCryptos() {
+            try {
+                const response = await fetch('/api/cryptos', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa('yourUsername:yourPassword')  // Use the same credentials as in .env
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                cryptoData = await response.json();
+                displayData(cryptoData);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function displayData(data) {
+            const tableBody = document.querySelector('#cryptoTable tbody');
+            tableBody.innerHTML = '';
+
+            data.forEach(crypto => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${crypto.name}</td>
+                    <td>$${crypto.current_price.toFixed(2)}</td>
+                    <td>$${crypto.market_cap.toLocaleString()}</td>
+                    <td>$${crypto.total_volume.toLocaleString()}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function filterTable() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = cryptoData.filter(crypto =>
+                crypto.name.toLowerCase().includes(searchInput)
+            );
+            displayData(filteredData);
+        }
+
+        function sortTable() {
+            const sortBy = document.getElementById('sortBy').value;
+            let sortedData = [...cryptoData];
+
+            if (sortBy === 'price') {
+                sortedData.sort((a, b) => a.current_price - b.current_price);
+            } else if (sortBy === 'market_cap') {
+                sortedData.sort((a, b) => a.market_cap - b.market_cap);
+            } else if (sortBy === 'name') {
+                sortedData.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            displayData(sortedData);
+        }
+        setInterval(fetchCryptos(), 30000)
+    </script>
+</body>
+</html>
