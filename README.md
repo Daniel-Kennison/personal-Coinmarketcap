@@ -28,8 +28,7 @@ Install dependencies
 ```
 
 Start the server:
-
-http://localhost:5000/
+http://localhost:5000
 
 ```bash
   npm start
